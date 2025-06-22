@@ -3,6 +3,7 @@ import { Task } from '../models/tasks.js';
 import logger from '../logs/logger.js';
 import { Status } from '../constants/index.js';
 import { encriptar } from '../common/bycript.js';
+import { Op } from "sequelize";
 
 async function getUsers(req, res, next) {
   try {
@@ -135,6 +136,51 @@ async function getTasks(req, res, next) {
   }
 }
 
+async function pagination(req, res, next) {
+  const {
+    page = 1,
+    limit = 10,
+    search = '',
+    orderBy = 'id',
+    orderDir = 'DESC',
+  } = req.query;
+
+  const allowedLimits = [5, 10, 15, 20];
+  const parsedLimit = parseInt(limit);
+
+  if (!allowedLimits.includes(parsedLimit)) {
+    return res.status(400).json({
+      error: `El parámetro 'limit' solo puede ser uno de los siguientes valores: ${allowedLimits.join(', ')}`,
+    });
+  }
+
+  const offset = (page - 1) * parsedLimit;
+
+  try {
+    const users = await User.findAndCountAll({
+      attributes: ['id', 'username', 'status'],
+      where: {
+        status: Status.ACTIVE,
+        ...(search && {
+          username: { [Op.iLike]: `%${search}%` }
+        })
+      },
+      order: [[orderBy, orderDir.toUpperCase()]],
+      limit: parsedLimit,
+      offset,
+    });
+
+    res.json({
+      total: users.count,
+      page: parseInt(page),
+      totalPages: Math.ceil(users.count / parsedLimit),
+      data: users.rows,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
 export default {
   getUsers,
   createUser,
@@ -143,4 +189,5 @@ export default {
   deleteUser,
   activeInative,
   getTasks,
+  pagination,
 };

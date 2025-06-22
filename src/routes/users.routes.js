@@ -24,4 +24,8 @@ router
 
 router.get('/:id/tasks', authenticatedToken, userController.getTasks);
 
+router.get('/list/pagination', userController.pagination);
+
+
+
 export default router;
