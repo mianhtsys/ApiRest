@@ -17,7 +17,7 @@ const config = {
     BYCRYPT_SALT_ROUNDS: +process.env.BYCRYPT_SALT_ROUNDS ?? 10,
     JWT_SECRET: process.env.JWT_SECRET,
     JWT_EXPIRES_SECONDS: process.env.JWT_EXPIRES_SECONDS,
-
+    DB_USE_SSL: process.env.DB_USE_SSL ?? false,
 
 };
 

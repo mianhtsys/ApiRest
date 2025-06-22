@@ -9,7 +9,15 @@ export const sequelize = new Sequelize(
   {
     host: config.DB_HOST,
     dialect: config.DB_DIALECT, // 'mysql', 'postgres', 'sqlite', 'mariadb', 'mssql'
-    logging: console.log(), // Disable logging for cleaner output
+    logging: console.log(), 
+    
+    dialectOptions: 
+      config.DB_USE_SSL === 'true' ? {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false, // para segurar que la conexion sea segura
+      },
+    } : {},
   }
 );
 
